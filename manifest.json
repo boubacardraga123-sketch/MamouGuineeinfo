@@ -1,0 +1,35 @@
+{
+  "name": "MG.info — Mamou Guinée Infos",
+  "short_name": "MG.info",
+  "description": "L'actualité de Mamou et de la Guinée",
+  "start_url": "/mg_info.html",
+  "display": "standalone",
+  "background_color": "#0f1117",
+  "theme_color": "#CE1126",
+  "orientation": "portrait-primary",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["news"],
+  "shortcuts": [
+    {
+      "name": "Administration",
+      "short_name": "Admin",
+      "description": "Accéder à l'espace administrateur",
+      "url": "/mg_info_admin.html",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
