@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>MG.info — Mamou Guinée Infos</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#CE1126">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MG.info">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 
@@ -1003,6 +1009,32 @@ footer{
 </div>
 
 <!-- HEADER -->
+<!-- ══ TITRE PRINCIPAL ══ -->
+<div style="
+  background: #fff;
+  text-align: center;
+  padding: 18px 16px 12px;
+  border-bottom: 3px solid #CE1126;
+">
+  <div style="
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(1.6rem, 7vw, 2.8rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  ">
+    <span style="color:#1a3cff;">Mamou </span><span style="color:#1a3cff;">Guinée </span><span style="color:#CE1126;">info</span>
+  </div>
+  <div style="
+    font-size: clamp(0.65rem, 2.5vw, 0.8rem);
+    color: #666;
+    font-family: 'Sora', sans-serif;
+    margin-top: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  ">L'actualité de Mamou &amp; de la Guinée</div>
+</div>
+
 <header>
   <div class="header-inner">
     <a class="brand" href="#" onclick="return false">
@@ -1227,7 +1259,7 @@ function formatDate(ts) {
   try {
     const d = ts.toDate ? ts.toDate() : new Date(ts);
     const diff = (Date.now() - d) / 1000;
-    if (diff < 60)   return 'À l'instant';
+    if (diff < 60)   return "À l'instant";
     if (diff < 3600) return `Il y a ${Math.floor(diff/60)} min`;
     if (diff < 86400) return `Il y a ${Math.floor(diff/3600)}h`;
     if (diff < 172800) return 'Hier';
@@ -1698,7 +1730,7 @@ async function sendComment() {
       </div>
     `);
   } else {
-    showToast('❌ Erreur lors de l'envoi. Réessayez.');
+    showToast("❌ Erreur lors de l'envoi. Réessayez.");
   }
 }
 
