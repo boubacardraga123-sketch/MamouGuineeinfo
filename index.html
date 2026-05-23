@@ -917,6 +917,27 @@ footer{
     });
   });
 
+  // ─── Écoute temps réel des vidéos publiées ───────────────────────────────
+  const qVideos = query(
+    collection(db, "videos"),
+    where("status", "==", "publie"),
+    orderBy("createdAt", "desc"),
+    limit(20)
+  );
+  onSnapshot(qVideos, (snap) => {
+    const videos = snap.docs.map(d => ({ _docId: d.id, ...d.data() }));
+    window._VIDEOS = videos;
+    if (window._onVideosUpdate) window._onVideosUpdate(videos);
+  }, (err) => {
+    const qFallback = query(collection(db, "videos"), orderBy("createdAt", "desc"), limit(20));
+    onSnapshot(qFallback, (snap) => {
+      const videos = snap.docs.map(d => ({ _docId: d.id, ...d.data() }))
+        .filter(v => !v.status || v.status === "publie");
+      window._VIDEOS = videos;
+      if (window._onVideosUpdate) window._onVideosUpdate(videos);
+    });
+  });
+
   // ─── Écoute temps réel du ticker ─────────────────────────────────────────
   onSnapshot(collection(db, "ticker"), (snap) => {
     const items = snap.docs.map(d => d.data().texte).filter(Boolean);
@@ -995,6 +1016,29 @@ footer{
   <div class="loader-sub" id="loaderSub">Chargement de l'actualité…</div>
 </div>
 
+<!-- VIDEO PLAYER OVERLAY -->
+<div id="videoPlayerOverlay" onclick="closeVideoPlayer(event)" style="
+  position:fixed;inset:0;z-index:700;
+  background:rgba(0,0,0,.92);
+  display:none;align-items:center;justify-content:center;flex-direction:column;
+">
+<style>
+#videoPlayerOverlay.open{display:flex!important}
+</style>
+<div style="
+  padding:16px;
+">
+  <div style="width:100%;max-width:720px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div id="videoPlayerTitle" style="color:#fff;font-family:'Sora',sans-serif;font-weight:700;font-size:.9rem;flex:1;margin-right:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+      <button onclick="closeVideoPlayer()" style="background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>
+    </div>
+    <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;background:#000">
+      <iframe id="videoPlayerFrame" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div id="toast"></div>
 
@@ -1066,6 +1110,14 @@ footer{
   <!-- HERO -->
   <div class="hero-section">
     <div class="hero-grid" id="heroGrid"></div>
+  </div>
+
+  <!-- VIDÉOS -->
+  <div id="videosSection" style="display:none">
+    <div class="sec-header" style="margin:24px 0 12px">
+      <div class="sec-title"><span class="sec-line rouge"></span>📺 Vidéos</div>
+    </div>
+    <div class="shorts-row" id="videosRow"></div>
   </div>
 
   <!-- CONTENU + SIDEBAR -->
@@ -1818,6 +1870,63 @@ function copyLink() {
   navigator.clipboard.writeText(window.location.href).then(() => showToast('📋 Lien copié !'));
   closeShareSheet();
 }
+
+// ══════════════════════════════════════════════════════
+// VIDÉOS
+// ══════════════════════════════════════════════════════
+function ytId(url) {
+  if (!url) return null;
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function ytThumb(url) {
+  const id = ytId(url);
+  return id ? 'https://img.youtube.com/vi/' + id + '/mqdefault.jpg' : '';
+}
+function ytEmbed(url) {
+  const id = ytId(url);
+  return id ? 'https://www.youtube.com/embed/' + id + '?autoplay=1' : url;
+}
+
+let currentVideoUrl = '';
+
+function openVideo(url, titre) {
+  currentVideoUrl = ytEmbed(url);
+  document.getElementById('videoPlayerTitle').textContent = titre || '';
+  document.getElementById('videoPlayerFrame').src = currentVideoUrl;
+  document.getElementById('videoPlayerOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeVideoPlayer(e) {
+  if (e && e.target !== document.getElementById('videoPlayerOverlay')) return;
+  document.getElementById('videoPlayerFrame').src = '';
+  document.getElementById('videoPlayerOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function renderVideos(videos) {
+  const section = document.getElementById('videosSection');
+  const row = document.getElementById('videosRow');
+  if (!videos || !videos.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  row.innerHTML = videos.map(v => {
+    const thumb = ytThumb(v.url || v.embedUrl || '');
+    return `
+    <div class="short-card" onclick="openVideo('${(v.url || v.embedUrl || '').replace(/'/g,"\\'")}','${(v.titre||'').replace(/'/g,"\\'")}')">
+      <div class="short-thumb">
+        ${thumb ? `<img src="${thumb}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">` : '🎬'}
+        <div class="short-overlay"></div>
+        <div class="short-play">▶</div>
+      </div>
+      <div class="short-info">
+        <div class="short-title">${v.titre || 'Vidéo'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window._onVideosUpdate = renderVideos;
+if (window._VIDEOS) renderVideos(window._VIDEOS);
 
 // ══════════════════════════════════════════════════════
 // ACCÈS ADMIN SECRET (5 clics rapides sur le logo)
