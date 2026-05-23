@@ -1127,7 +1127,7 @@ if (window._onFbReady) window._onFbReady();
   <!-- ══ APERÇU DU SITE ══ -->
   <div class="page" id="page-apercu">
     <div class="apercu-toolbar">
-      <div class="apercu-bar">Interface publique — <span>mg_info.html</span></div>
+      <div class="apercu-bar">Interface publique — <span>index.html</span></div>
       <div style="display:flex;gap:8px;align-items:center">
         <div class="apercu-tabs">
           <button class="apercu-tab active" onclick="setApercuMode('desktop',this)">🖥️ Bureau</button>
@@ -1141,12 +1141,12 @@ if (window._onFbReady) window._onFbReady();
       <iframe
         id="apercuFrame"
         class="apercu-iframe"
-        src="mg_info.html"
+        src="index.html"
         title="Aperçu interface publique"
         sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
       ></iframe>
     </div>
-    <div class="apercu-note">⚠️ L'aperçu charge <strong>mg_info.html</strong> depuis le même dossier. Assurez-vous que les deux fichiers sont dans le même répertoire.</div>
+    <div class="apercu-note">⚠️ L'aperçu charge <strong>index.html</strong> depuis le même dossier. Assurez-vous que les deux fichiers sont dans le même répertoire.</div>
   </div>
 
 <!-- ══ MODAL ARTICLE ══ -->
@@ -1803,7 +1803,7 @@ function reloadApercu() {
 }
 
 function openInNewTab() {
-  window.open('mg_info.html', '_blank');
+  window.open('index.html', '_blank');
 }
 
 // Exposition des fonctions globales (nécessaire avec type="module")
