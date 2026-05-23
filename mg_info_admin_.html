@@ -698,37 +698,6 @@ tbody tr:hover{background:var(--surface)}
   .form-row{grid-template-columns:1fr}
 }
 
-/* ══════════════ VIDÉOS ══════════════ */
-.videos-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
-  gap:14px;
-  margin-top:16px;
-}
-.video-card{
-  background:var(--bg2);border:1px solid var(--border);
-  border-radius:var(--r2);overflow:hidden;
-  transition:var(--t);
-}
-.video-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:var(--s2)}
-.video-thumb{
-  position:relative;width:100%;aspect-ratio:16/9;
-  background:var(--bg3);overflow:hidden;
-  display:flex;align-items:center;justify-content:center;
-  font-size:2.5rem;
-}
-.video-thumb img{width:100%;height:100%;object-fit:cover}
-.video-play-ico{
-  position:absolute;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.35);
-  font-size:2rem;
-}
-.video-info{padding:12px 14px}
-.video-title{font-size:.82rem;font-weight:600;color:var(--blanc);margin-bottom:4px;line-height:1.3}
-.video-meta{font-size:.65rem;color:var(--txt2);font-family:'JetBrains Mono',monospace;display:flex;gap:8px;flex-wrap:wrap}
-.video-actions{padding:0 14px 12px;display:flex;gap:8px}
-
 /* Scrollbar global */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -911,27 +880,6 @@ window._watchStats = (cb) => {
 window._fbReady = true;
 if (window._onFbReady) window._onFbReady();
 
-// ── Vidéos ────────────────────────────────────────────────────────
-window._watchVideos = (cb) => {
-  const q = query(collection(db,"videos"), orderBy("createdAt","desc"), limit(100));
-  return onSnapshot(q, snap => cb(snap.docs.map(d=>({_docId:d.id,...d.data()}))));
-};
-window._createVideo = async (data) => {
-  try {
-    const ref = await addDoc(collection(db,"videos"), {...data, createdAt:serverTimestamp()});
-    return { ok:true, id:ref.id };
-  } catch(e){ return { ok:false, err:e.message }; }
-};
-window._updateVideo = async (docId, data) => {
-  try {
-    await updateDoc(doc(db,"videos",docId), {...data, updatedAt:serverTimestamp()});
-    return { ok:true };
-  } catch(e){ return { ok:false, err:e.message }; }
-};
-window._deleteVideo = async (docId) => {
-  try { await deleteDoc(doc(db,"videos",docId)); return { ok:true }; }
-  catch(e){ return { ok:false }; }
-};
 </script>
 </head>
 <body>
@@ -971,7 +919,6 @@ window._deleteVideo = async (docId) => {
     <button class="nav-item" onclick="nav('articles',this)"><span class="nav-icon">📰</span>Articles<span class="nav-badge" id="navBadgeArticles">0</span></button>
     <button class="nav-item" onclick="nav('comments',this)"><span class="nav-icon">💬</span>Commentaires<span class="nav-badge" id="navBadgeComments">0</span></button>
     <div class="nav-section-label" style="margin-top:8px">Contenu</div>
-    <button class="nav-item" onclick="nav('videos',this)"><span class="nav-icon">🎬</span>Vidéos</button>
     <button class="nav-item" onclick="nav('ticker',this)"><span class="nav-icon">📡</span>Fil d'actualité</button>
     <div class="nav-section-label" style="margin-top:8px">Système</div>
     <button class="nav-item" onclick="nav('apercu',this)"><span class="nav-icon">👁️</span>Aperçu du site</button>
@@ -1131,16 +1078,6 @@ window._deleteVideo = async (docId) => {
           </div>
         </div>
       </div>
-    </div>
-  </div>
-
-  <!-- ══ VIDÉOS ══ -->
-  <div class="page" id="page-videos">
-    <div class="articles-toolbar">
-      <button class="btn-primary" onclick="openVideoModal()">🎬 Ajouter une vidéo</button>
-    </div>
-    <div id="videosList">
-      <div class="videos-grid" id="videosGrid"></div>
     </div>
   </div>
 
@@ -1306,65 +1243,6 @@ window._deleteVideo = async (docId) => {
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- MODAL VIDÉO -->
-<div class="modal-overlay" id="videoModal">
-  <div class="modal" style="max-width:540px">
-    <div class="modal-header">
-      <div class="modal-title" id="videoModalTitle">🎬 Ajouter une vidéo</div>
-      <button class="modal-close" onclick="closeVideoModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="form-row single">
-        <div class="form-group-m">
-          <label class="form-label-m">Titre de la vidéo *</label>
-          <input class="form-input-m" id="vTitre" placeholder="Ex : Reportage spécial — Mamou">
-        </div>
-      </div>
-      <div class="form-row single">
-        <div class="form-group-m">
-          <label class="form-label-m">URL YouTube / embed *</label>
-          <input class="form-input-m" id="vUrl" placeholder="https://www.youtube.com/watch?v=… ou https://youtu.be/…">
-          <div style="font-size:.65rem;color:var(--txt3);margin-top:4px">Coller le lien YouTube — l'embed sera généré automatiquement</div>
-        </div>
-      </div>
-      <div class="form-row single">
-        <div class="form-group-m">
-          <label class="form-label-m">Description (optionnel)</label>
-          <textarea class="form-textarea-m" id="vDesc" placeholder="Courte description de la vidéo…" style="height:80px"></textarea>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group-m">
-          <label class="form-label-m">Catégorie</label>
-          <select class="form-select-m" id="vCat">
-            <option value="actualite">📺 Actualité</option>
-            <option value="politique">🔴 Politique</option>
-            <option value="economie">🟡 Économie</option>
-            <option value="societe">🟢 Société</option>
-            <option value="sport">🔵 Sport</option>
-            <option value="culture">🟣 Culture</option>
-            <option value="international">🌍 International</option>
-          </select>
-        </div>
-        <div class="form-group-m">
-          <label class="form-label-m">Statut</label>
-          <select class="form-select-m" id="vStatus">
-            <option value="publie">✅ Publié</option>
-            <option value="brouillon">📝 Brouillon</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn-danger-modal" id="btnDelVideo" style="display:none" onclick="delVideoFromModal()">🗑️ Supprimer</button>
-      <div style="display:flex;gap:10px;margin-left:auto">
-        <button class="btn-secondary" onclick="closeVideoModal()">Annuler</button>
-        <button class="btn-primary" onclick="saveVideo()" id="btnSaveVideo">🚀 Publier</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- MODALE CONFIRMATION SUPPRESSION -->
 <div class="del-overlay" id="delModal">
   <div class="del-card">
@@ -1450,7 +1328,6 @@ const PAGE_TITLES = {
   articles:  'Articles <span>Gestion du contenu</span>',
   comments:  'Commentaires <span>Modération</span>',
   ticker:    'Fil d\'actualité <span>Ticker en temps réel</span>',
-  videos:    'Vidéos <span>Gestion des vidéos</span>',
   apercu:    'Aperçu du site <span>Interface publique</span>',
   settings:  'Paramètres <span>Configuration</span>',
 };
@@ -1621,12 +1498,6 @@ function initApp() {
   window._watchTicker(items => {
     _ticker = items;
     renderTicker();
-  });
-
-  // Vidéos
-  window._watchVideos(vids => {
-    _videos = vids;
-    renderVideosGrid();
   });
 
   // Stats
@@ -1970,137 +1841,6 @@ async function deleteCmt(docId) {
 }
 
 // ══════════════════════════════════════════════════
-// VIDÉOS
-// ══════════════════════════════════════════════════
-let _videos = [];
-let _editingVideoId = null;
-
-const VIDEO_CAT_LABELS = {
-  actualite:'Actualité', politique:'Politique', economie:'Économie',
-  societe:'Société', sport:'Sport', culture:'Culture', international:'International'
-};
-
-function ytId(url) {
-  if (!url) return null;
-  const m = url.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([A-Za-z0-9_-]{11})/);
-  return m ? m[1] : null;
-}
-function ytEmbedUrl(url) {
-  const id = ytId(url);
-  return id ? 'https://www.youtube.com/embed/' + id : url;
-}
-function ytThumb(url) {
-  const id = ytId(url);
-  return id ? 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg' : '';
-}
-
-function renderVideosGrid() {
-  const el = document.getElementById('videosGrid');
-  if (!_videos.length) {
-    el.innerHTML = emptyFb('Aucune vidéo','Ajoutez votre première vidéo avec le bouton 🎬');
-    return;
-  }
-  el.innerHTML = _videos.map(v => {
-    const thumb = ytThumb(v.url||'');
-    return `
-    <div class="video-card">
-      <div class="video-thumb">
-        ${thumb ? `<img src="${thumb}" alt="">` : '🎬'}
-        <div class="video-play-ico">▶️</div>
-      </div>
-      <div class="video-info">
-        <div class="video-title">${v.titre||'Sans titre'}</div>
-        <div class="video-meta">
-          <span>${VIDEO_CAT_LABELS[v.cat]||v.cat||''}</span>
-          <span>${v.status==='publie'?'✅ Publié':'📝 Brouillon'}</span>
-          <span>${fmtDate(v.createdAt)}</span>
-        </div>
-      </div>
-      <div class="video-actions">
-        <button class="btn-tbl vert" title="Modifier" onclick="editVideo('${v._docId}')">✏️</button>
-        <button class="btn-tbl" title="Supprimer" onclick="delVideo('${v._docId}')">🗑️</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function openVideoModal() {
-  _editingVideoId = null;
-  document.getElementById('videoModalTitle').textContent = '🎬 Ajouter une vidéo';
-  ['vTitre','vUrl','vDesc'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('vCat').value = 'actualite';
-  document.getElementById('vStatus').value = 'publie';
-  document.getElementById('btnDelVideo').style.display = 'none';
-  document.getElementById('videoModal').classList.add('open');
-  document.getElementById('vTitre').focus();
-}
-
-function editVideo(docId) {
-  const v = _videos.find(x=>x._docId===docId);
-  if (!v) return;
-  _editingVideoId = docId;
-  document.getElementById('videoModalTitle').textContent = '✏️ Modifier la vidéo';
-  document.getElementById('vTitre').value  = v.titre  || '';
-  document.getElementById('vUrl').value    = v.url    || '';
-  document.getElementById('vDesc').value   = v.desc   || '';
-  document.getElementById('vCat').value    = v.cat    || 'actualite';
-  document.getElementById('vStatus').value = v.status || 'publie';
-  document.getElementById('btnDelVideo').style.display = 'inline-flex';
-  document.getElementById('videoModal').classList.add('open');
-}
-
-function closeVideoModal() {
-  document.getElementById('videoModal').classList.remove('open');
-  _editingVideoId = null;
-}
-
-async function saveVideo() {
-  const titre = document.getElementById('vTitre').value.trim();
-  const url   = document.getElementById('vUrl').value.trim();
-  if (!titre) { showToast('⚠️ Le titre est obligatoire','error'); return; }
-  if (!url)   { showToast('⚠️ L\'URL est obligatoire','error'); return; }
-
-  const data = {
-    titre,
-    url,
-    embedUrl: ytEmbedUrl(url),
-    desc:   document.getElementById('vDesc').value.trim(),
-    cat:    document.getElementById('vCat').value,
-    status: document.getElementById('vStatus').value,
-  };
-
-  const btn = document.getElementById('btnSaveVideo');
-  btn.disabled = true; btn.textContent = '⏳…';
-
-  let res;
-  if (_editingVideoId) {
-    res = await window._updateVideo(_editingVideoId, data);
-    showToast(res.ok ? '✅ Vidéo mise à jour !' : '❌ Erreur : '+res.err, res.ok?'success':'error');
-  } else {
-    res = await window._createVideo(data);
-    showToast(res.ok ? '🎬 Vidéo publiée !' : '❌ Erreur : '+res.err, res.ok?'success':'error');
-  }
-  btn.disabled = false; btn.textContent = '🚀 Publier';
-  if (res.ok) closeVideoModal();
-}
-
-async function delVideo(docId, e) {
-  if (e) e.stopPropagation();
-  if (!confirm('Supprimer cette vidéo ?')) return;
-  const res = await window._deleteVideo(docId);
-  showToast(res.ok ? '🗑️ Vidéo supprimée' : '❌ Erreur', res.ok?'':'error');
-}
-
-function delVideoFromModal() {
-  if (_editingVideoId) delVideo(_editingVideoId);
-  closeVideoModal();
-}
-
-document.getElementById('videoModal').addEventListener('click', e=>{
-  if (e.target===document.getElementById('videoModal')) closeVideoModal();
-});
-
-// ══════════════════════════════════════════════════
 // TICKER
 // ══════════════════════════════════════════════════
 function renderTicker() {
@@ -2199,12 +1939,6 @@ window.setApercuMode = setApercuMode;
 window.toggleSidebar = toggleSidebar;
 window.renderArtsTable = renderArtsTable;
 window.showToast = showToast;
-window.openVideoModal = openVideoModal;
-window.closeVideoModal = closeVideoModal;
-window.editVideo = editVideo;
-window.saveVideo = saveVideo;
-window.delVideo = delVideo;
-window.delVideoFromModal = delVideoFromModal;
 </script>
 </body>
 </html>
