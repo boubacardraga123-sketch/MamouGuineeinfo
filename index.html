@@ -888,10 +888,9 @@ footer{
   const app = initializeApp(firebaseConfig);
   const db  = getFirestore(app);
 
-  // ─── Écoute temps réel des articles publiés ───────────────────────────────
+  // ─── Écoute temps réel des articles ─────────────────────────────────────
   const qArticles = query(
     collection(db, "articles"),
-    where("status", "==", "publie"),
     orderBy("createdAt", "desc"),
     limit(100)
   );
@@ -901,26 +900,12 @@ footer{
     window._ARTICLES = articles;
     if (window._onArticlesUpdate) window._onArticlesUpdate(articles);
   }, (err) => {
-    // Si index manquant, essayer sans le filtre where
-    console.warn("Index manquant, requête simplifiée:", err.message);
-    const qFallback = query(
-      collection(db, "articles"),
-      orderBy("createdAt", "desc"),
-      limit(100)
-    );
-    onSnapshot(qFallback, (snap) => {
-      const articles = snap.docs
-        .map(d => ({ _docId: d.id, ...d.data() }))
-        .filter(a => !a.status || a.status === "publie");
-      window._ARTICLES = articles;
-      if (window._onArticlesUpdate) window._onArticlesUpdate(articles);
-    });
+    console.warn("Erreur Firestore:", err.message);
   });
 
-  // ─── Écoute temps réel des vidéos publiées ───────────────────────────────
+  // ─── Écoute temps réel des vidéos ───────────────────────────────────────
   const qVideos = query(
     collection(db, "videos"),
-    where("status", "==", "publie"),
     orderBy("createdAt", "desc"),
     limit(20)
   );
@@ -929,13 +914,7 @@ footer{
     window._VIDEOS = videos;
     if (window._onVideosUpdate) window._onVideosUpdate(videos);
   }, (err) => {
-    const qFallback = query(collection(db, "videos"), orderBy("createdAt", "desc"), limit(20));
-    onSnapshot(qFallback, (snap) => {
-      const videos = snap.docs.map(d => ({ _docId: d.id, ...d.data() }))
-        .filter(v => !v.status || v.status === "publie");
-      window._VIDEOS = videos;
-      if (window._onVideosUpdate) window._onVideosUpdate(videos);
-    });
+    console.warn("Erreur vidéos:", err.message);
   });
 
   // ─── Écoute temps réel du ticker ─────────────────────────────────────────
