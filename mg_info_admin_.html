@@ -1327,7 +1327,7 @@ async function doLogin() {
   err.style.display = 'none';
 
   if (!email || !pass) {
-    err.textContent = '❌ Veuillez renseigner l'e-mail et le mot de passe.';
+    err.textContent = '❌ Veuillez renseigner l\u2019e-mail et le mot de passe.';
     err.style.display = 'block';
     return;
   }
@@ -1805,6 +1805,26 @@ function reloadApercu() {
 function openInNewTab() {
   window.open('mg_info.html', '_blank');
 }
+
+// Exposition des fonctions globales (nécessaire avec type="module")
+window.doLogin = doLogin;
+window.doLogout = doLogout;
+window.openInNewTab = openInNewTab;
+window.nav = nav;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.saveArt = saveArt;
+window.delArt = delArt;
+window.editArt = editArt;
+window.addTicker = addTicker;
+window.delTicker = delTicker;
+window.approveCmt = approveCmt;
+window.deleteCmt = deleteCmt;
+window.reloadApercu = reloadApercu;
+window.setApercuMode = setApercuMode;
+window.toggleSidebar = toggleSidebar;
+window.renderArtsTable = renderArtsTable;
+window.showToast = showToast;
 </script>
 </body>
 </html>
