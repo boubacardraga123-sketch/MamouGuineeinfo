@@ -1,12 +1,12 @@
 {
-  "name": "MG.info — Mamou Guinée Infos",
-  "short_name": "MG.info",
-  "description": "L'actualité de Mamou et de la Guinée",
-  "start_url": "/mg_info.html",
+  "name": "NimbaActu.com — Votre fenêtre sur la Guinée et le monde",
+  "short_name": "NimbaActu",
+  "description": "Actualités de la Guinée et du monde",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f1117",
+  "orientation": "portrait",
+  "background_color": "#fafafa",
   "theme_color": "#CE1126",
-  "orientation": "portrait-primary",
   "lang": "fr",
   "icons": [
     {
@@ -20,16 +20,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "categories": ["news"],
-  "shortcuts": [
-    {
-      "name": "Administration",
-      "short_name": "Admin",
-      "description": "Accéder à l'espace administrateur",
-      "url": "/mg_info_admin.html",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
