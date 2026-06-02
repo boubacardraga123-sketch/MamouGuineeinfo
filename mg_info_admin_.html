@@ -1044,14 +1044,41 @@ window._deleteVideo = async (docId) => {
         <div class="stat-value" id="st-likes">—</div>
         <div class="stat-change up">Temps réel</div>
       </div>
+      <div class="stat-card" style="color:#f87171">
+        <span class="stat-icon">🎬</span>
+        <div class="stat-label">Vidéos publiées</div>
+        <div class="stat-value" id="st-videos">—</div>
+        <div class="stat-change up" id="st-videos-sub">Chargement…</div>
+      </div>
+      <div class="stat-card" style="color:#a78bfa">
+        <span class="stat-icon">👁️</span>
+        <div class="stat-label">Vues vidéos</div>
+        <div class="stat-value" id="st-videos-vues">—</div>
+        <div class="stat-change up">Temps réel</div>
+      </div>
+      <div class="stat-card" style="color:#fb923c">
+        <span class="stat-icon">❤️</span>
+        <div class="stat-label">Likes vidéos</div>
+        <div class="stat-value" id="st-videos-likes">—</div>
+        <div class="stat-change up">Temps réel</div>
+      </div>
     </div>
     <div class="dashboard-grid">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><span class="card-title-icon">📰</span>Derniers articles publiés</div>
-          <button class="card-action" onclick="nav('articles',null)">Gérer →</button>
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <div class="card-title"><span class="card-title-icon">📰</span>Derniers articles publiés</div>
+            <button class="card-action" onclick="nav('articles',null)">Gérer →</button>
+          </div>
+          <div id="dashArticles" style="padding:8px 0"></div>
         </div>
-        <div id="dashArticles" style="padding:8px 0"></div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="card-title-icon">🎬</span>Dernières vidéos publiées</div>
+            <button class="card-action" onclick="nav('videos',null)">Gérer →</button>
+          </div>
+          <div id="dashVideos" style="padding:8px 0"></div>
+        </div>
       </div>
       <div>
         <div class="card" style="margin-bottom:16px">
@@ -2711,6 +2738,7 @@ function initVideos() {
       _videos = vids;
       renderVideosList();
       updateVideoStats();
+      updateDashboardVideos();
       const badge = document.getElementById('navBadgeVideos');
       if (badge) badge.textContent = vids.filter(v => v.status === 'publie').length;
     });
@@ -2727,6 +2755,45 @@ function updateVideoStats() {
   if (elT) elT.textContent = pub.length;
   if (elV) elV.textContent = fmt(vues);
   if (elL) elL.textContent = fmt(likes);
+}
+
+function updateDashboardVideos() {
+  const pub   = _videos.filter(v => v.status === 'publie');
+  const total = pub.length;
+  const vues  = _videos.reduce((s, v) => s + (v.vues  || 0), 0);
+  const likes = _videos.reduce((s, v) => s + (v.likes || 0), 0);
+
+  // Cartes stats dashboard
+  const elN = document.getElementById('st-videos');
+  const elS = document.getElementById('st-videos-sub');
+  const elV = document.getElementById('st-videos-vues');
+  const elL = document.getElementById('st-videos-likes');
+  if (elN) elN.textContent = total;
+  if (elS) elS.textContent = `${total} au total`;
+  if (elV) elV.textContent = fmt(vues);
+  if (elL) elL.textContent = fmt(likes);
+
+  // Section "Dernières vidéos" dans le dashboard
+  const el = document.getElementById('dashVideos');
+  if (!el) return;
+  const recent = pub.slice(0, 5);
+  if (!recent.length) {
+    el.innerHTML = emptyFb('Aucune vidéo publiée', 'Publiez votre première vidéo courte avec le bouton 🎬');
+    return;
+  }
+  el.innerHTML = recent.map(v => `
+    <div style="padding:10px 20px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)">
+      <span style="font-size:1.1rem">${v.type === 'youtube' ? '▶️' : v.type === 'facebook' ? '📘' : '🎬'}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.8rem;font-weight:600;color:var(--blanc);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escH(v.titre || 'Sans titre')}</div>
+        <div style="font-size:.65rem;color:var(--txt2);margin-top:2px">${VD_CAT_LABELS[v.cat] || ''} · 👁️ ${fmt(v.vues)} · ❤️ ${fmt(v.likes)} · ${fmtDate(v.createdAt)}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn-tbl vert" title="Modifier" onclick="editVideo('${v._docId}')" style="font-size:.7rem">✏️</button>
+        <button class="btn-tbl" title="Supprimer" onclick="deleteVideoConfirm('${v._docId}',event)" style="font-size:.7rem">🗑️</button>
+      </div>
+    </div>
+  `).join('');
 }
 
 function filterVideos(q) { _videosSearch = q; renderVideosList(); }
@@ -2955,6 +3022,7 @@ window.previewVideo = previewVideo;
 window.previewVideoInline = previewVideoInline;
 window.filterVideos = filterVideos;
 window.renderVideosList = renderVideosList;
+window.updateDashboardVideos = updateDashboardVideos;
 
 // Initialiser le watcher pubs dès que Firebase est prêt
 if (window._fbReady) { initAds(); }
