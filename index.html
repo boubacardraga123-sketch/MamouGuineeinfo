@@ -1072,15 +1072,18 @@ footer{
   window._db = db;
 
   window._incrementVues = async (docId) => {
-    try { await updateDoc(doc(db,"articles",docId), { vues: increment(1) }); } catch(e){}
+    try { await updateDoc(doc(db,"articles",docId), { vues: increment(1) }); }
+    catch(e){ console.warn("[NimbaActu] increment vues échoué:", e.code, e.message); }
   };
 
   window._incrementLikes = async (docId) => {
-    try { await updateDoc(doc(db,"articles",docId), { likes: increment(1) }); } catch(e){}
+    try { await updateDoc(doc(db,"articles",docId), { likes: increment(1) }); }
+    catch(e){ console.warn("[NimbaActu] increment likes échoué:", e.code, e.message); }
   };
 
   window._decrementLikes = async (docId) => {
-    try { await updateDoc(doc(db,"articles",docId), { likes: increment(-1) }); } catch(e){}
+    try { await updateDoc(doc(db,"articles",docId), { likes: increment(-1) }); }
+    catch(e){ console.warn("[NimbaActu] decrement likes échoué:", e.code, e.message); }
   };
 
   window._saveComment = async (articleId, texte, auteur) => {
@@ -1152,12 +1155,14 @@ footer{
 
   // Incrémenter les vues d'une vidéo
   window._incrementVideoVues = async (docId) => {
-    try { await updateDoc(doc(db,"videos",docId), { vues: increment(1) }); } catch(e){}
+    try { await updateDoc(doc(db,"videos",docId), { vues: increment(1) }); }
+    catch(e){ console.warn("[NimbaActu] increment vues vidéo échoué:", e.code, e.message); }
   };
 
   // Incrémenter les likes d'une vidéo
   window._incrementVideoLikes = async (docId) => {
-    try { await updateDoc(doc(db,"videos",docId), { likes: increment(1) }); } catch(e){}
+    try { await updateDoc(doc(db,"videos",docId), { likes: increment(1) }); }
+    catch(e){ console.warn("[NimbaActu] increment likes vidéo échoué:", e.code, e.message); }
   };
 </script>
 </head>

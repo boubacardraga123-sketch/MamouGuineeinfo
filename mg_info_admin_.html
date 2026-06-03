@@ -2675,6 +2675,10 @@ function closeAdModal() {
 function editAd(docId) { openAdModal(docId); }
 
 async function saveAd() {
+  if (!window._createAd || !window._updateAd) {
+    showToast('❌ Firebase non prêt, réessayez dans un instant', 'error');
+    return;
+  }
   const type = document.getElementById('adType').value;
   const data = {
     nom:         document.getElementById('adNom').value.trim(),
@@ -2690,6 +2694,7 @@ async function saveAd() {
     actif:       document.getElementById('adActif').value === 'true',
     notes:       document.getElementById('adNotes').value.trim(),
   };
+  if (!data.nom)   { showToast('❌ Le nom de l\'annonceur est obligatoire', 'error'); return; }
   if (!data.titre) { showToast('❌ Le titre est obligatoire', 'error'); return; }
   let res;
   if (_editingAdId) {
@@ -2697,7 +2702,7 @@ async function saveAd() {
   } else {
     res = await window._createAd(data);
   }
-  showToast(res.ok ? '✅ Annonce enregistrée !' : '❌ Erreur : ' + (res.err||''), res.ok?'success':'error');
+  showToast(res.ok ? '✅ Annonce enregistrée !' : '❌ Erreur : ' + (res.err||'inconnue'), res.ok?'success':'error');
   if (res.ok) closeAdModal();
 }
 
