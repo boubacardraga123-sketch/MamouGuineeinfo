@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- SEO dynamique — rempli par JS après chargement Firestore -->
+  <title>NimbaActu.com – Actualité de la Guinée</title>
+  <meta name="description" content="NimbaActu.com, l'actualité de la région de Nzérékoré et de la Guinée.">
+  <meta property="og:title" content="NimbaActu.com – Actualité de la Guinée">
+  <meta property="og:description" content="NimbaActu.com, l'actualité de la région de Nzérékoré et de la Guinée.">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="NimbaActu.com">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:#f4f5f7;color:#1a1a2e;min-height:100vh}
+
+    /* ── Header ── */
+    .site-header{background:#CE1126;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+    .site-logo{color:#fff;font-weight:900;font-size:1.3rem;text-decoration:none;letter-spacing:.5px}
+    .back-btn{color:#fff;text-decoration:none;font-size:.85rem;opacity:.9;display:flex;align-items:center;gap:6px}
+    .back-btn svg{width:16px;height:16px}
+
+    /* ── Contenu ── */
+    .article-page{max-width:720px;margin:0 auto;padding:16px}
+
+    /* Skeleton loader */
+    .skeleton{background:linear-gradient(90deg,#e0e0e0 25%,#f0f0f0 50%,#e0e0e0 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .sk-img{height:220px;border-radius:12px;margin-bottom:16px}
+    .sk-badge{height:20px;width:80px;margin-bottom:12px}
+    .sk-title{height:28px;margin-bottom:8px}
+    .sk-title-2{height:28px;width:70%;margin-bottom:16px}
+    .sk-meta{height:16px;width:50%;margin-bottom:24px}
+    .sk-line{height:14px;margin-bottom:10px}
+    .sk-line-short{height:14px;width:80%;margin-bottom:10px}
+
+    /* Article rendu */
+    .art-hero{width:100%;height:220px;border-radius:12px;object-fit:cover;display:block;margin-bottom:16px}
+    .art-hero-emoji{width:100%;height:220px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:5rem;margin-bottom:16px}
+    .art-cat{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:3px 10px;border-radius:20px;color:#fff;background:#CE1126;margin-bottom:12px}
+    .art-title{font-size:1.4rem;font-weight:800;line-height:1.3;color:#1a1a2e;margin-bottom:10px}
+    .art-meta{font-size:.78rem;color:#6b7280;margin-bottom:20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .art-meta .source{font-weight:700;color:#1a1a2e}
+    .art-meta .sep{opacity:.4}
+    .art-body{font-size:.93rem;line-height:1.7;color:#374151}
+    .art-body p{margin-bottom:14px}
+    .art-body p:last-child{margin-bottom:0}
+    .art-body figure{margin:16px 0;text-align:center}
+    .art-body figure img{width:100%;border-radius:10px;object-fit:cover}
+    .art-body .video-wrap{position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;margin:16px 0}
+    .art-body .video-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+
+    /* Erreur */
+    .error-box{text-align:center;padding:48px 16px;color:#6b7280}
+    .error-box .icon{font-size:3rem;margin-bottom:12px}
+    .error-box h2{font-size:1.1rem;margin-bottom:8px;color:#1a1a2e}
+    .error-box a{color:#CE1126;text-decoration:none;font-weight:600}
+
+    /* Partage */
+    .share-bar{margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;display:flex;gap:10px;flex-wrap:wrap}
+    .share-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-size:.82rem;font-weight:600;text-decoration:none}
+    .share-copy{background:#f3f4f6;color:#374151}
+    .share-wa{background:#25D366;color:#fff}
+    .share-fb{background:#1877F2;color:#fff}
+
+    /* Retour vers site */
+    .more-news{margin-top:28px;padding:16px;background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+    .more-news h3{font-size:.9rem;font-weight:700;margin-bottom:4px;color:#1a1a2e}
+    .more-news p{font-size:.8rem;color:#6b7280;margin-bottom:12px}
+    .more-news a{display:inline-block;background:#CE1126;color:#fff;padding:9px 18px;border-radius:8px;text-decoration:none;font-size:.85rem;font-weight:600}
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <a href="index.html" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      Accueil
+    </a>
+    <a href="index.html" class="site-logo">NimbaActu.com</a>
+    <div style="width:60px"></div>
+  </header>
+
+  <main class="article-page" id="main">
+    <div id="skeleton">
+      <div class="skeleton sk-img"></div>
+      <div class="skeleton sk-badge"></div>
+      <div class="skeleton sk-title"></div>
+      <div class="skeleton sk-title-2"></div>
+      <div class="skeleton sk-meta"></div>
+      <div class="skeleton sk-line"></div>
+      <div class="skeleton sk-line"></div>
+      <div class="skeleton sk-line-short"></div>
+      <div class="skeleton sk-line"></div>
+      <div class="skeleton sk-line"></div>
+    </div>
+    <div id="content" style="display:none"></div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    import { getFirestore, doc, getDoc, updateDoc, increment }
+      from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyAlkPfpxRKqjR0DtQH53Ju4t_hEnliHK8Y",
+      authDomain:        "mg-info.firebaseapp.com",
+      projectId:         "mg-info",
+      storageBucket:     "mg-info.firebasestorage.app",
+      messagingSenderId: "289677218207",
+      appId:             "1:289677218207:web:3c9de8465d8b69bfae6daa"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    const CAT_LABELS = {
+      politique:'Politique', economie:'Économie', societe:'Société',
+      sport:'Sport', culture:'Culture', international:'International',
+      sante:'Santé', technologie:'Technologie'
+    };
+    const CAT_GRADIENTS = {
+      politique:'linear-gradient(135deg,#CE1126,#a00d1e)',
+      economie: 'linear-gradient(135deg,#d4a500,#f59e0b)',
+      sport:    'linear-gradient(135deg,#009460,#4ade80)',
+      culture:  'linear-gradient(135deg,#7c3aed,#c084fc)',
+      societe:  'linear-gradient(135deg,#1d4ed8,#60a5fa)',
+      sante:    'linear-gradient(135deg,#009460,#6ee7b7)',
+      technologie:'linear-gradient(135deg,#1d4ed8,#60a5fa)',
+      international:'linear-gradient(135deg,#0369a1,#38bdf8)',
+      default:  'linear-gradient(135deg,#1a1a2e,#0f3460)',
+    };
+    const CAT_EMOJIS = {
+      politique:'🏛️', economie:'📈', sport:'⚽', culture:'🎭',
+      societe:'👥', sante:'🏥', technologie:'💻', international:'🌍', default:'📰'
+    };
+
+    function getCatLabel(a){ return a.catLabel || CAT_LABELS[a.cat] || a.cat || 'Actualité'; }
+    function getGradient(a){ return a.thumbBg || CAT_GRADIENTS[a.cat] || CAT_GRADIENTS.default; }
+    function getEmoji(a){ return a.emoji || a.thumb || CAT_EMOJIS[a.cat] || CAT_EMOJIS.default; }
+
+    function formatDate(ts) {
+      if (!ts) return '';
+      try {
+        const d = ts.toDate ? ts.toDate() : new Date(ts);
+        const diff = (Date.now() - d) / 1000;
+        if (diff < 60)    return "À l'instant";
+        if (diff < 3600)  return `Il y a ${Math.floor(diff/60)} min`;
+        if (diff < 86400) return `Il y a ${Math.floor(diff/3600)}h`;
+        if (diff < 172800) return 'Hier';
+        return d.toLocaleDateString('fr-FR');
+      } catch(e){ return ''; }
+    }
+
+    function renderParagraph(p) {
+      const ytMatch = p.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+      if (ytMatch) return `<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen loading="lazy"></iframe></div>`;
+      const fbMatch = p.match(/https?:\/\/(?:www\.)?facebook\.com\/[^\s]+\/videos\/[^\s]+/);
+      if (fbMatch) return `<div class="video-wrap"><iframe src="https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(fbMatch[0])}&show_text=0" allowfullscreen loading="lazy"></iframe></div>`;
+      return `<p>${p}</p>`;
+    }
+
+    function renderBloc(b) {
+      if (b.type === 'texte') return `<p>${b.valeur}</p>`;
+      if (b.type === 'image') return `<figure><img src="${b.valeur}" alt="" loading="lazy" onerror="this.style.display='none'"></figure>`;
+      if (b.type === 'video') {
+        const yt = b.valeur.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+        if (yt) return `<div class="video-wrap"><iframe src="https://www.youtube.com/embed/${yt[1]}" allowfullscreen loading="lazy"></iframe></div>`;
+        const fb = b.valeur.match(/https?:\/\/(?:www\.)?facebook\.com\/[^\s]+\/videos\/[^\s]+/);
+        if (fb) return `<div class="video-wrap"><iframe src="https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(fb[0])}&show_text=0" allowfullscreen loading="lazy"></iframe></div>`;
+      }
+      return '';
+    }
+
+    function renderBody(a) {
+      if (Array.isArray(a.blocs) && a.blocs.length)
+        return a.blocs.map(b => renderBloc(b)).join('');
+      if (a.corps && Array.isArray(a.corps))
+        return a.corps.map(p => renderParagraph(p)).join('');
+      if (a.corps && typeof a.corps === 'string')
+        return a.corps.split('\n').filter(Boolean).map(p => renderParagraph(p)).join('');
+      if (a.resume) return `<p>${a.resume}</p>`;
+      return '';
+    }
+
+    function updateSEO(a) {
+      const titre = a.titre || 'NimbaActu.com';
+      const desc  = a.resume || a.seoDesc || 'NimbaActu.com – Actualité de la région de Nzérékoré et de la Guinée';
+      const img   = a.imageUrl || a.ogImage || '';
+      const url   = window.location.href;
+      const cat   = getCatLabel(a);
+
+      document.title = `${titre} | NimbaActu.com`;
+      setMeta('name', 'description', desc);
+      setMeta('property', 'og:title', titre);
+      setMeta('property', 'og:description', desc);
+      setMeta('property', 'og:url', url);
+      setMeta('property', 'og:type', 'article');
+      setMeta('property', 'og:site_name', 'NimbaActu.com');
+      if (img) setMeta('property', 'og:image', img);
+      setMeta('name', 'twitter:title', titre);
+      setMeta('name', 'twitter:description', desc);
+      if (img) setMeta('name', 'twitter:image', img);
+
+      const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        "headline": titre,
+        "description": desc,
+        "url": url,
+        "articleSection": cat,
+        "publisher": {
+          "@type": "Organization",
+          "name": "NimbaActu.com",
+          "url": "https://nimbaactu.com"
+        }
+      };
+      if (img) jsonLd.image = img;
+      if (a.createdAt) {
+        try {
+          const d = a.createdAt.toDate ? a.createdAt.toDate() : new Date(a.createdAt);
+          jsonLd.datePublished = d.toISOString();
+        } catch(e){}
+      }
+      let ld = document.getElementById('jsonld');
+      if (!ld) { ld = document.createElement('script'); ld.type = 'application/ld+json'; ld.id = 'jsonld'; document.head.appendChild(ld); }
+      ld.textContent = JSON.stringify(jsonLd);
+    }
+
+    function setMeta(attr, val, content) {
+      let el = document.querySelector(`meta[${attr}="${val}"]`);
+      if (!el) { el = document.createElement('meta'); el.setAttribute(attr, val); document.head.appendChild(el); }
+      el.setAttribute('content', content);
+    }
+
+    function buildShareBar(a) {
+      const url   = window.location.href;
+      const titre = a.titre || 'NimbaActu.com';
+      return `
+        <div class="share-bar">
+          <button class="share-btn share-copy" onclick="navigator.clipboard.writeText('${url.replace(/'/g,"\\'")}');this.textContent='✅ Copié !'">
+            🔗 Copier le lien
+          </button>
+          <a class="share-btn share-wa" href="https://wa.me/?text=${encodeURIComponent(titre+' – '+url)}" target="_blank" rel="noopener">
+            📲 WhatsApp
+          </a>
+          <a class="share-btn share-fb" href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}" target="_blank" rel="noopener">
+            👍 Facebook
+          </a>
+        </div>`;
+    }
+
+    async function loadArticle() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+
+      if (!id) {
+        showError('Aucun article spécifié.', true);
+        return;
+      }
+
+      try {
+        const snap = await getDoc(doc(db, 'articles', id));
+        if (!snap.exists()) {
+          showError("Cet article est introuvable ou a été supprimé.", true);
+          return;
+        }
+
+        const a = { _docId: snap.id, ...snap.data() };
+
+        updateDoc(doc(db, 'articles', id), { vues: increment(1) }).catch(()=>{});
+
+        updateSEO(a);
+
+        const heroHtml = a.imageUrl
+          ? `<img class="art-hero" src="${a.imageUrl}" alt="${(a.titre||'').replace(/"/g,'&quot;')}" loading="eager">`
+          : `<div class="art-hero-emoji" style="background:${getGradient(a)}">${getEmoji(a)}</div>`;
+
+        const bodyHtml = renderBody(a);
+
+        document.getElementById('content').innerHTML = `
+          ${heroHtml}
+          <span class="art-cat">${getCatLabel(a)}</span>
+          <h1 class="art-title">${a.titre || ''}</h1>
+          <div class="art-meta">
+            <span class="source">${a.source || 'NimbaActu.com'}</span>
+            <span class="sep">·</span>
+            <span>${formatDate(a.createdAt)}</span>
+            <span class="sep">·</span>
+            <span>👁️ ${a.vues || 0} vues</span>
+          </div>
+          <div class="art-body">${bodyHtml}</div>
+          ${buildShareBar(a)}
+          <div class="more-news">
+            <h3>📰 Plus d'actualités</h3>
+            <p>Retrouvez toutes les dernières nouvelles de la région de Nzérékoré et de la Guinée.</p>
+            <a href="index.html">Voir toutes les actualités →</a>
+          </div>
+        `;
+
+        document.getElementById('skeleton').style.display = 'none';
+        document.getElementById('content').style.display  = 'block';
+
+      } catch (err) {
+        console.error('Erreur chargement article :', err);
+        showError("Impossible de charger l'article. Vérifiez votre connexion.", false);
+      }
+    }
+
+    function showError(msg, withLink) {
+      document.getElementById('skeleton').style.display = 'none';
+      document.getElementById('content').innerHTML = `
+        <div class="error-box">
+          <div class="icon">📭</div>
+          <h2>${msg}</h2>
+          ${withLink ? '<p style="margin-top:12px"><a href="index.html">← Retour à l\'accueil</a></p>' : ''}
+        </div>`;
+      document.getElementById('content').style.display = 'block';
+    }
+
+    loadArticle();
+  </script>
+</body>
+</html>
