@@ -951,6 +951,16 @@ window._deleteVideo = async (docId) => {
   catch(e){ return { ok:false }; }
 };
 
+window._incrementVideoVues = async (docId) => {
+  try { await updateDoc(doc(db,"videos",docId), { vues: increment(1) }); return { ok:true }; }
+  catch(e){ return { ok:false }; }
+};
+
+window._incrementVideoLikes = async (docId) => {
+  try { await updateDoc(doc(db,"videos",docId), { likes: increment(1) }); return { ok:true }; }
+  catch(e){ return { ok:false }; }
+};
+
 </script>
 </head>
 <body>
@@ -2990,10 +3000,9 @@ async function saveVideo() {
     thumbnail:   document.getElementById('vdThumbnail').value.trim(),
     duree:       document.getElementById('vdDuree').value.trim(),
     status:      document.getElementById('vdStatus').value,
-    vues:        _editingVideoId ? (_videos.find(v => v._docId === _editingVideoId)?.vues || 0) : 0,
-    likes:       _editingVideoId ? (_videos.find(v => v._docId === _editingVideoId)?.likes || 0) : 0,
   };
 
+  // Ne pas inclure vues/likes dans la mise à jour pour ne pas écraser les compteurs
   let res;
   if (_editingVideoId) {
     res = await window._updateVideo(_editingVideoId, data);
