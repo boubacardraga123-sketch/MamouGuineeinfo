@@ -55,6 +55,7 @@
 <!-- ══ MONETAG — Réseau publicitaire ══ -->
 <!-- Remplace XXXXXXXX par ton vrai ID Monetag après inscription sur monetag.com -->
 <script src="https://quge5.com/88/tag.min.js" data-zone="246257" async data-cfasync="false"></script>
+<script>(function(s){s.dataset.zone='11101896',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 <style>
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -1896,6 +1897,19 @@ async function openArticle(docId) {
   // Mettre à jour l'URL sans recharger la page
   history.pushState({ articleId: docId }, '', '?id=' + docId);
 
+  // Mise à jour dynamique SEO pour Google
+  const seoTitle = (a.titre || 'NimbaActu.com') + ' — NimbaActu.com';
+  const seoDesc  = a.resume || a.titre || 'Actualité guinéenne en temps réel.';
+  const seoImage = a.imageUrl || 'https://nimbaactu.com/icon-192.png';
+  const seoUrl   = 'https://nimbaactu.com/?id=' + docId;
+  document.title = seoTitle;
+  document.querySelector('meta[name="description"]')?.setAttribute('content', seoDesc);
+  document.querySelector('link[rel="canonical"]')?.setAttribute('href', seoUrl);
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', seoTitle);
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', seoDesc);
+  document.querySelector('meta[property="og:url"]')?.setAttribute('content', seoUrl);
+  document.querySelector('meta[property="og:image"]')?.setAttribute('content', seoImage);
+
   // Incrémenter vues
   if (window._incrementVues) window._incrementVues(docId);
 
@@ -2009,6 +2023,15 @@ function closeArticle(e) {
   document.body.style.overflow = '';
   // Restaurer l'URL propre sans l'?id=
   history.pushState(null, '', window.location.pathname);
+
+  // Restaurer les balises SEO par défaut
+  document.title = 'NimbaActu.com — Votre fenêtre sur la Guinée et le monde.';
+  document.querySelector('meta[name="description"]')?.setAttribute('content', 'NimbaActu.com : actualité guinéenne en temps réel. Politique, économie, société, sport et culture de Guinée Conakry et de la diaspora.');
+  document.querySelector('link[rel="canonical"]')?.setAttribute('href', 'https://nimbaactu.com/');
+  document.querySelector('meta[property="og:title"]')?.setAttribute('content', 'NimbaActu.com — Votre fenêtre sur la Guinée et le monde.');
+  document.querySelector('meta[property="og:description"]')?.setAttribute('content', 'Actualité guinéenne en temps réel : politique, économie, société, sport et culture.');
+  document.querySelector('meta[property="og:url"]')?.setAttribute('content', 'https://nimbaactu.com/');
+  document.querySelector('meta[property="og:image"]')?.setAttribute('content', 'https://nimbaactu.com/icon-192.png');
 }
 
 // Gérer le bouton retour du navigateur
