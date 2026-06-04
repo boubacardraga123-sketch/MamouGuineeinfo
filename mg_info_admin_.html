@@ -2032,9 +2032,8 @@ function initApp() {
       `${stats.articles} au total`;
   });
 
-  // Rafraîchir les stats vidéos (déjà chargées avant le login)
-  if (typeof updateDashboardVideos === 'function') updateDashboardVideos();
-  if (typeof updateVideoStats === 'function') updateVideoStats();
+  // Lancer le watcher vidéos (nécessaire pour afficher le dashboard)
+  if (typeof initVideos === 'function') initVideos();
 
   showToast('🇬🇳 Bienvenue sur NimbaActu.com Admin !', 'success');
 }
@@ -2751,8 +2750,12 @@ const VD_CAT_LABELS = {
 };
 const VD_TYPE_LABELS = { url:'MP4/WebM', youtube:'YouTube', facebook:'Facebook' };
 
+let _videosWatcherStarted = false;
+
 function initVideos() {
+  if (_videosWatcherStarted) { updateDashboardVideos(); updateVideoStats(); return; }
   if (window._watchVideos) {
+    _videosWatcherStarted = true;
     window._watchVideos(vids => {
       _videos = vids;
       renderVideosList();
@@ -3046,13 +3049,6 @@ async function confirmDeleteVideo() {
 document.getElementById('videoModal').addEventListener('click', e => {
   if (e.target === document.getElementById('videoModal')) closeVideoModal();
 });
-
-// Initialiser le watcher vidéos dès que Firebase est prêt
-if (window._fbReady) { initVideos(); }
-else {
-  const _origFbReadyVd = window._onFbReady;
-  window._onFbReady = () => { if (_origFbReadyVd) _origFbReadyVd(); initVideos(); };
-}
 
 // Exposition globale
 window.openVideoModal = openVideoModal;
